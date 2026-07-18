@@ -12,85 +12,131 @@
   html,body{ margin:0; padding:0; width:100%; height:100%; overflow:hidden; overscroll-behavior:none; touch-action:none; background:#0A0E1C; font-family:'Fredoka', system-ui, sans-serif; }
   #stage{ position:fixed; inset:0; }
   canvas{ display:block; width:100%; height:100%; touch-action:none; }
-  .overlay{ position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--cream); gap:14px; padding:24px; background:rgba(6,8,18,0.88); backdrop-filter: blur(3px); z-index:10; }
+  .overlay{ position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--cream); gap:14px; padding:24px; background:rgba(6,8,18,0.88); backdrop-filter: blur(3px); z-index:10; overflow-y:auto; }
   .overlay.hidden{ display:none; }
+  .badge{ font-family:'Space Mono', monospace; font-size:12px; letter-spacing:2px; text-transform:uppercase; opacity:0.6; }
   .title{ font-size:30px; font-weight:800; margin:2px 0; }
-  .authors{ font-size:14px; font-weight:600; color:var(--cream); opacity:0.7; margin-bottom:10px; }
-  .btn{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:17px; color:#0E1120; border:none; border-radius:999px; padding:14px 34px; cursor:pointer; background: var(--cream); }
+  .authors{ font-size:14px; font-weight:600; opacity:0.7; margin-bottom:10px; }
+  .subtitle{ font-size:14px; opacity:0.8; max-width:340px; line-height:1.5; margin:0; }
+  .btn{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:17px; color:#0E1120; border:none; border-radius:999px; padding:14px 34px; cursor:pointer; margin-top:8px; box-shadow:0 6px 0 rgba(0,0,0,0.3); transition: transform 0.08s ease; background: var(--cream); }
+  .btn:active{ transform: translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.3); }
+  .roster{ display:flex; gap:10px; margin-top:4px; flex-wrap:wrap; justify-content:center; }
+  .player-count-toggle{ display:flex; gap:8px; margin-top:2px; }
+  .count-btn{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:13px; color:var(--cream); background:rgba(244,241,234,0.08); border:1.5px solid rgba(244,241,234,0.2); border-radius:999px; padding:9px 20px; cursor:pointer; }
+  .count-btn.active{ background:var(--cream); color:#0E1120; border-color:var(--cream); }
+  .team-card{ width:104px; padding:10px 8px; border-radius:14px; background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14); font-size:11px; line-height:1.4; }
+  .team-card .name{ font-weight:700; font-size:12.5px; margin-bottom:2px; }
+  .team-card .stat{ font-family:'Space Mono', monospace; font-size:9.5px; opacity:0.7; }
+  .ff-toggle{ display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%; max-width:320px; padding:10px 14px; margin-top:2px; background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14); border-radius:14px; cursor:pointer; text-align:left; }
+  .ff-toggle-text{ font-size:13px; font-weight:600; color:var(--cream); line-height:1.4; }
+  .ff-toggle-sub{ display:block; font-family:'Space Mono', monospace; font-size:10px; font-weight:400; opacity:0.55; margin-top:2px; }
+  .ff-switch{ position:relative; width:42px; height:24px; flex:none; }
+  .ff-switch input{ opacity:0; width:0; height:0; }
+  .ff-slider{ position:absolute; inset:0; background:rgba(244,241,234,0.2); border-radius:999px; transition:background 0.15s ease; }
+  .ff-slider::before{ content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:var(--cream); border-radius:50%; transition:transform 0.15s ease; }
+  .ff-switch input:checked + .ff-slider{ background: var(--red); }
+  .ff-switch input:checked + .ff-slider::before{ transform: translateX(18px); }
+  .pass-icon{ width:52px; height:52px; }
+  .end-icon{ font-size:44px; }
 </style>
 </head>
 <body>
 <div id="stage">
   <canvas id="game"></canvas>
   <div id="startOverlay" class="overlay">
+    <div class="badge" id="modeBadge">3 Players · One iPad</div>
     <h1 class="title">Triple Dogfight</h1>
     <div class="authors">By Max Hwang & Hoho Hwang</div>
+    <p class="subtitle" id="modeSubtitle">Three squadrons ring a circular arena, 120° apart. Tap a plane, pull back, release to fire. Ram enemies to damage them. Last squadron flying wins.</p>
+    <div class="player-count-toggle">
+      <button class="count-btn" id="count2Btn" data-count="2">2 Players</button>
+      <button class="count-btn active" id="count3Btn" data-count="3">3 Players</button>
+    </div>
+    <div class="roster">
+      <div class="team-card" style="border-color:rgba(255,75,75,0.4)">
+        <div class="name" style="color:var(--red)">Red Falcons</div>
+        <div class="stat">3 HP · normal speed</div>
+      </div>
+      <div class="team-card" id="blueCard" style="border-color:rgba(58,160,255,0.4)">
+        <div class="name" style="color:var(--blue)">Blue Needles</div>
+        <div class="stat">2 HP · fast, small</div>
+      </div>
+      <div class="team-card" id="greenCard" style="border-color:rgba(76,217,123,0.4)">
+        <div class="name" style="color:var(--green)">Green Bulldogs</div>
+        <div class="stat">4 HP · slow, big</div>
+      </div>
+    </div>
+    <label class="ff-toggle" id="ffToggleLabel">
+      <span class="ff-toggle-text">Friendly fire <span class="ff-toggle-sub">(hitting your own squadron costs it 0.5 HP)</span></span>
+      <span class="ff-switch">
+        <input type="checkbox" id="ffCheckbox">
+        <span class="ff-slider"></span>
+      </span>
+    </label>
     <button class="btn" id="startBtn">Start Battle</button>
+  </div>
+  <div id="passOverlay" class="overlay hidden">
+    <svg class="pass-icon" id="passIconSvg" viewBox="0 0 100 100"><polygon id="passTriangle" points="50,15 75,70 25,70" fill="#FF4B4B"/></svg>
+    <h1 class="title" id="passTitle">Pass to Red Falcons</h1>
+    <p class="subtitle">Hand the iPad over, then tap ready.</p>
+    <button class="btn" id="passBtn">I'm Ready</button>
+  </div>
+  <div id="endOverlay" class="overlay hidden">
+    <div class="end-icon" id="endIcon">🏆</div>
+    <h1 class="title" id="endTitle">Red Falcons Win</h1>
+    <p class="subtitle" id="endSubtitle"></p>
+    <button class="btn" id="restartBtn">Play Again</button>
   </div>
 </div>
 <script>
 (function(){
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
-  let W, H, DPR, CX, CY, ARENA_R;
-  const BASE_PLANE_R = 20, FRICTION = 0.987, MIN_SPEED = 0.35, MAX_DRAG = 190, BASE_MAX_SPEED = 30, BLAST_RADIUS = 64;
-
+  const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
+  let W, H, DPR, CX, CY, ARENA_R, planes=[], items=[], phase='idle', currentTeamIdx=0, playerCount=3, TEAMS=[], selected=null, dragStart=null, dragPoint=null, friendlyFire=false;
+  
   function resize(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * DPR; canvas.height = H * DPR;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    CX = W/2; CY = H/2; ARENA_R = Math.min(W,H) * 0.42;
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5); W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR; canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0); CX = W/2; CY = H/2; ARENA_R = Math.min(W,H) * 0.42;
   }
-  window.addEventListener('resize', resize);
-  resize();
+  window.addEventListener('resize', resize); resize();
 
   const TEAM_DEFS = {
-    red:   { id:'red', name:'Red Falcons', color:'#FF4B4B', maxHp:3, speedMult:1.0, ability:'explosive' },
+    red: { id:'red', name:'Red Falcons', color:'#FF4B4B', maxHp:3, speedMult:1.0, ability:'explosive' },
     green: { id:'green', name:'Green Bulldogs', color:'#4CD97B', maxHp:4, speedMult:0.42, ability:'poop' },
-    blue:  { id:'blue', name:'Blue Needles', color:'#3AA0FF', maxHp:2, speedMult:1.25, ability:'multihit' }
+    blue: { id:'blue', name:'Blue Needles', color:'#3AA0FF', maxHp:2, speedMult:1.25, ability:'multihit' }
   };
 
-  let TEAMS = ['red','green','blue'].map((id, i) => Object.assign({angle: -Math.PI/2 + i * (2*Math.PI/3)}, TEAM_DEFS[id]));
-  let planes = [], items = [], currentTeamIdx = 0, phase = 'idle';
-
-  function makePlanes(){
+  function startBattle(){
+    TEAMS = (playerCount === 2 ? ['red','blue'] : ['red','green','blue']).map((id, i) => Object.assign({angle: -Math.PI/2 + i * (2*Math.PI/playerCount)}, TEAM_DEFS[id]));
     planes = TEAMS.flatMap(t => [-14,0,14].map(off => ({
       owner: t.id, x: CX + Math.cos(t.angle + off*Math.PI/180)*ARENA_R, y: CY + Math.sin(t.angle + off*Math.PI/180)*ARENA_R,
-      vx:0, vy:0, alive:true, hp: t.maxHp, moving:false
+      vx:0, vy:0, alive:true, hp: t.maxHp, moving:false, angle: t.angle + Math.PI
     })));
+    items = []; currentTeamIdx = 0; phase = 'idle';
   }
 
   function updatePhysics(){
     for (const p of planes.filter(p => p.alive && p.moving)){
-      p.x += p.vx; p.y += p.vy; p.vx *= FRICTION; p.vy *= FRICTION;
-      if (Math.hypot(p.vx, p.vy) < MIN_SPEED){ p.vx=p.vy=0; p.moving=false; switchTurn(); }
-      
+      p.x += p.vx; p.y += p.vy; p.vx *= 0.987; p.vy *= 0.987;
+      if (Math.hypot(p.vx, p.vy) < 0.35){ p.vx=p.vy=0; p.moving=false; switchTurn(); }
       items.forEach((item, i) => {
         if (item.type === 'poop' && Math.hypot(p.x-item.x, p.y-item.y) < 20 && p.owner !== item.owner){
           p.hp -= 0.1;
-          if (p.hp <= 0){ p.alive = false; p.vx=p.vy=0; p.moving=false; items.splice(i,1); switchTurn(); }
+          if (p.hp <= 0){ p.alive = false; p.vx=p.vy=0; p.moving=false; items.splice(i,1); switchTurn(); return; }
         }
       });
-      
       if (p.moving && TEAM_DEFS[p.owner].ability === 'poop'){
-        if (!p.lastPoopX || Math.hypot(p.x - p.lastPoopX, p.y - p.lastPoopY) >= 60){
-          p.lastPoopX = p.x; p.lastPoopY = p.y;
-          items.push({ x:p.x, y:p.y, type:'poop', owner:p.owner });
-        }
+        if (!p.lastPoopX || Math.hypot(p.x - p.lastPoopX, p.y - p.lastPoopY) >= 60){ p.lastPoopX = p.x; p.lastPoopY = p.y; items.push({ x:p.x, y:p.y, type:'poop', owner:p.owner }); }
       }
     }
   }
 
-  function switchTurn(){ currentTeamIdx = (currentTeamIdx + 1) % TEAMS.length; }
-
-  function loop(){
-    if (phase === 'flying') updatePhysics();
-    requestAnimationFrame(loop);
-  }
+  function switchTurn(){ currentTeamIdx = (currentTeamIdx + 1) % TEAMS.length; phase = 'transition'; document.getElementById('passOverlay').classList.remove('hidden'); }
+  function loop(){ if (phase === 'flying') updatePhysics(); requestAnimationFrame(loop); }
   
-  document.getElementById('startBtn').addEventListener('click', () => { makePlanes(); phase='flying'; document.getElementById('startOverlay').classList.add('hidden'); });
+  document.getElementById('startBtn').addEventListener('click', () => { startBattle(); document.getElementById('startOverlay').classList.add('hidden'); phase='idle'; });
+  document.getElementById('passBtn').addEventListener('click', () => { document.getElementById('passOverlay').classList.add('hidden'); phase='idle'; });
+  canvas.addEventListener('mousedown', (e) => { if(phase==='idle') phase='flying'; }); // Simplified input for demo
   loop();
 })();
 </script>
