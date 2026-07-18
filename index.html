@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Air Arena</title>
+<title>Sky Arena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&family=Space+Mono&display=swap" rel="stylesheet">
 <style>
@@ -89,7 +89,7 @@
 
   <div id="startOverlay" class="overlay">
     <div class="badge" id="modeBadge">3 Players · One iPad</div>
-    <h1 class="title">Air Arena</h1>
+    <h1 class="title">Sky Arena</h1>
     <p class="author-credit">Author: Max Hwang &amp; Hoho Hwang</p>
     <p class="subtitle" id="modeSubtitle">Three squadrons ring a circular arena, 120° apart — perfectly even ground no matter what shape the screen is. Tap a plane, pull back, release to fire. Ram enemies to damage them. Last squadron flying wins.</p>
 
@@ -366,13 +366,11 @@
   }
 
   function spawnItem(){
-    const bombExists = items.some(it => it.type === 'bomb');
-    // only one bomb allowed on the field at a time — if one's already out, spawn a heal instead
-    const type = (!bombExists && Math.random() < 0.5) ? 'bomb' : 'heal';
+    // bomb item removed (too powerful) — only healing items spawn now
+    const type = 'heal';
     const angle = Math.random()*Math.PI*2;
     const dist = Math.random()*(ARENA_R - 50);
     const item = { x: CX+Math.cos(angle)*dist, y: CY+Math.sin(angle)*dist, type, r:16, spawnAt: Date.now() };
-    if (type === 'bomb') item.turnsLeft = TEAMS.length; // bomb disappears after one full round if untouched
     items.push(item);
   }
 
@@ -384,11 +382,11 @@
       tries++;
     } while (alivePlanes(TEAMS[currentTeamIdx].id).length === 0 && tries <= TEAMS.length);
 
-    // poop hazards and the bomb item expire after one full round (once every team has had a turn)
+    // poop hazards expire after one full round (once every team has had a turn)
     // — healing items are NOT included here, so they persist on the field until someone picks them up
     for (let i=items.length-1; i>=0; i--){
       const it = items[i];
-      if (it.type !== 'poop' && it.type !== 'bomb') continue;
+      if (it.type !== 'poop') continue;
       it.turnsLeft--;
       if (it.turnsLeft <= 0) items.splice(i,1);
     }
@@ -932,23 +930,20 @@
       }
       ctx.scale(pulse, pulse);
       if (item.type === 'heal'){
-        ctx.beginPath(); ctx.arc(0,0,item.r,0,Math.PI*2);
-        ctx.fillStyle = 'rgba(76,217,123,0.18)'; ctx.fill();
-        ctx.beginPath(); ctx.arc(0,0,item.r,0,Math.PI*2);
-        ctx.strokeStyle = '#4CD97B'; ctx.lineWidth = 2.5; ctx.stroke();
-        ctx.fillStyle = '#4CD97B';
-        ctx.fillRect(-2.5, -9, 5, 18);
-        ctx.fillRect(-9, -2.5, 18, 5);
-      } else {
-        ctx.beginPath(); ctx.arc(0,0,item.r,0,Math.PI*2);
-        ctx.fillStyle = 'rgba(255,138,61,0.18)'; ctx.fill();
-        ctx.beginPath(); ctx.arc(0,0,item.r,0,Math.PI*2);
-        ctx.strokeStyle = '#FF8A3D'; ctx.lineWidth = 2.5; ctx.stroke();
-        ctx.beginPath(); ctx.arc(0,1,7,0,Math.PI*2);
-        ctx.fillStyle = '#2A1810'; ctx.fill();
-        ctx.strokeStyle = '#FF8A3D'; ctx.lineWidth = 2; ctx.lineCap='round';
-        ctx.beginPath(); ctx.moveTo(4,-4); ctx.lineTo(9,-11); ctx.stroke();
-        ctx.beginPath(); ctx.arc(9,-13,2.2,0,Math.PI*2); ctx.fillStyle='#FFD23F'; ctx.fill();
+        const s = item.r * 0.85; // square half-size
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.35)';
+        ctx.shadowBlur = 6;
+        if (ctx.roundRect){ ctx.beginPath(); ctx.roundRect(-s, -s, s*2, s*2, 4); }
+        else { ctx.beginPath(); ctx.rect(-s, -s, s*2, s*2); }
+        ctx.fillStyle = '#FFFFFF'; ctx.fill();
+        ctx.restore();
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 1.5;
+        if (ctx.roundRect){ ctx.beginPath(); ctx.roundRect(-s, -s, s*2, s*2, 4); ctx.stroke(); }
+        // red cross
+        ctx.fillStyle = '#E23B3B';
+        ctx.fillRect(-s*0.24, -s*0.68, s*0.48, s*1.36);
+        ctx.fillRect(-s*0.68, -s*0.24, s*1.36, s*0.48);
       }
       ctx.restore();
     }
