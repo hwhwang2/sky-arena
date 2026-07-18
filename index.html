@@ -21,7 +21,6 @@
   .btn{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:17px; color:#0E1120; border:none; border-radius:999px; padding:14px 34px; cursor:pointer; margin-top:8px; box-shadow:0 6px 0 rgba(0,0,0,0.3); transition: transform 0.08s ease; background: var(--cream); }
   .btn:active{ transform: translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.3); }
   .roster{ display:flex; gap:10px; margin-top:4px; flex-wrap:wrap; justify-content:center; }
-  .player-count-toggle{ display:flex; gap:8px; margin-top:2px; }
   .count-btn{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:13px; color:var(--cream); background:rgba(244,241,234,0.08); border:1.5px solid rgba(244,241,234,0.2); border-radius:999px; padding:9px 20px; cursor:pointer; }
   .count-btn.active{ background:var(--cream); color:#0E1120; border-color:var(--cream); }
   .team-card{ width:104px; padding:10px 8px; border-radius:14px; background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14); font-size:11px; line-height:1.4; }
@@ -67,36 +66,33 @@
       </div>
     </div>
     <label class="ff-toggle" id="ffToggleLabel">
-      <span class="ff-toggle-text">Friendly fire <span class="ff-toggle-sub">(hitting your own squadron costs it 0.5 HP)</span></span>
-      <span class="ff-switch">
-        <input type="checkbox" id="ffCheckbox">
-        <span class="ff-slider"></span>
-      </span>
+      <span class="ff-toggle-text">Friendly fire</span>
+      <span class="ff-switch"><input type="checkbox" id="ffCheckbox"><span class="ff-slider"></span></span>
     </label>
     <button class="btn" id="startBtn">Start Battle</button>
   </div>
   <div id="passOverlay" class="overlay hidden">
     <svg class="pass-icon" id="passIconSvg" viewBox="0 0 100 100"><polygon id="passTriangle" points="50,15 75,70 25,70" fill="#FF4B4B"/></svg>
     <h1 class="title" id="passTitle">Pass to Red Falcons</h1>
-    <p class="subtitle">Hand the iPad over, then tap ready.</p>
     <button class="btn" id="passBtn">I'm Ready</button>
   </div>
   <div id="endOverlay" class="overlay hidden">
     <div class="end-icon" id="endIcon">🏆</div>
     <h1 class="title" id="endTitle">Red Falcons Win</h1>
-    <p class="subtitle" id="endSubtitle"></p>
     <button class="btn" id="restartBtn">Play Again</button>
   </div>
 </div>
 <script>
 (function(){
   const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
-  let W, H, DPR, CX, CY, ARENA_R, planes=[], items=[], phase='idle', currentTeamIdx=0, playerCount=3, TEAMS=[], selected=null, dragStart=null, dragPoint=null, friendlyFire=false;
+  let W, H, CX, CY, ARENA_R, planes=[], items=[], phase='idle', currentTeamIdx=0, playerCount=3, TEAMS=[], selected=null, dragStart=null, dragPoint=null, friendlyFire=false, cancelFlash=0;
   
   function resize(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2.5); W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * DPR; canvas.height = H * DPR; canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    ctx.setTransform(DPR,0,0,DPR,0,0); CX = W/2; CY = H/2; ARENA_R = Math.min(W,H) * 0.42;
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * window.devicePixelRatio; canvas.height = H * window.devicePixelRatio;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
+    CX = W/2; CY = H/2; ARENA_R = Math.min(W,H) * 0.42;
   }
   window.addEventListener('resize', resize); resize();
 
@@ -125,18 +121,39 @@
           if (p.hp <= 0){ p.alive = false; p.vx=p.vy=0; p.moving=false; items.splice(i,1); switchTurn(); return; }
         }
       });
-      if (p.moving && TEAM_DEFS[p.owner].ability === 'poop'){
-        if (!p.lastPoopX || Math.hypot(p.x - p.lastPoopX, p.y - p.lastPoopY) >= 60){ p.lastPoopX = p.x; p.lastPoopY = p.y; items.push({ x:p.x, y:p.y, type:'poop', owner:p.owner }); }
+      if (p.moving && TEAM_DEFS[p.owner].ability === 'poop' && (!p.lastPoopX || Math.hypot(p.x - p.lastPoopX, p.y - p.lastPoopY) >= 60)){
+        p.lastPoopX = p.x; p.lastPoopY = p.y; items.push({ x:p.x, y:p.y, type:'poop', owner:p.owner });
       }
     }
   }
 
-  function switchTurn(){ currentTeamIdx = (currentTeamIdx + 1) % TEAMS.length; phase = 'transition'; document.getElementById('passOverlay').classList.remove('hidden'); }
-  function loop(){ if (phase === 'flying') updatePhysics(); requestAnimationFrame(loop); }
+  function switchTurn(){ 
+    if(planes.filter(p=>p.alive).length > 1){
+      currentTeamIdx = (currentTeamIdx + 1) % playerCount;
+      phase = 'transition';
+      document.getElementById('passTitle').textContent = 'Pass to ' + TEAMS[currentTeamIdx].name;
+      document.getElementById('passOverlay').classList.remove('hidden');
+    }
+  }
+
+  function loop(){ 
+    if (phase === 'flying') updatePhysics();
+    ctx.clearRect(0,0,W*window.devicePixelRatio, H*window.devicePixelRatio);
+    planes.forEach(p => { if(p.alive) { ctx.fillStyle=TEAM_DEFS[p.owner].color; ctx.fillRect(p.x-10, p.y-10, 20, 20); } });
+    requestAnimationFrame(loop); 
+  }
   
-  document.getElementById('startBtn').addEventListener('click', () => { startBattle(); document.getElementById('startOverlay').classList.add('hidden'); phase='idle'; });
+  document.getElementById('count2Btn').addEventListener('click', () => { playerCount=2; document.getElementById('count2Btn').classList.add('active'); document.getElementById('count3Btn').classList.remove('active'); });
+  document.getElementById('count3Btn').addEventListener('click', () => { playerCount=3; document.getElementById('count3Btn').classList.add('active'); document.getElementById('count2Btn').classList.remove('active'); });
+  document.getElementById('startBtn').addEventListener('click', () => { startBattle(); document.getElementById('startOverlay').classList.add('hidden'); });
   document.getElementById('passBtn').addEventListener('click', () => { document.getElementById('passOverlay').classList.add('hidden'); phase='idle'; });
-  canvas.addEventListener('mousedown', (e) => { if(phase==='idle') phase='flying'; }); // Simplified input for demo
+  
+  canvas.addEventListener('mousedown', (e) => { 
+    if(phase==='idle'){ 
+      let p = planes.find(p=>p.alive && p.owner===TEAMS[currentTeamIdx].id && Math.hypot(p.x-(e.clientX), p.y-(e.clientY))<40);
+      if(p){ phase='flying'; p.vx = (Math.random()-0.5)*20; p.vy = (Math.random()-0.5)*20; p.moving=true; }
+    } 
+  });
   loop();
 })();
 </script>
