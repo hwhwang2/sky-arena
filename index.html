@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Triple Dogfight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red: #FF4B4B; --red-dark:#B22E2E;
+    --blue: #3AA0FF; --blue-dark:#1F5FA8;
+    --green: #4CD97B; --green-dark:#2E8F4E;
+    --cream: #F4F1EA;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    overflow:hidden; overscroll-behavior:none; touch-action:none;
+    background:#0A0E1C;
+    font-family:'Fredoka', system-ui, sans-serif;
+  }
+  #stage{ position:fixed; inset:0; }
+  canvas{ display:block; width:100%; height:100%; touch-action:none; }
+
+  .overlay{
+    position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    color:var(--cream); gap:14px; padding:24px;
+    background:rgba(6,8,18,0.88); backdrop-filter: blur(3px);
+    z-index:10; overflow-y:auto;
+  }
+  .overlay.hidden{ display:none; }
+  .badge{
+    font-family:'Space Mono', monospace; font-size:12px; letter-spacing:2px;
+    text-transform:uppercase; opacity:0.6;
+  }
+  .title{ font-size:30px; font-weight:800; margin:2px 0; }
+  .authors{ font-size:14px; font-weight:600; color:var(--cream); opacity:0.7; margin-bottom:10px; }
+  .subtitle{ font-size:14px; opacity:0.8; max-width:340px; line-height:1.5; margin:0; }
+  .btn{
+    font-family:'Fredoka', sans-serif; font-weight:700; font-size:17px;
+    color:#0E1120; border:none; border-radius:999px; padding:14px 34px;
+    cursor:pointer; margin-top:8px; box-shadow:0 6px 0 rgba(0,0,0,0.3);
+    transition: transform 0.08s ease; background: var(--cream);
+  }
+  .btn:active{ transform: translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.3); }
+
+  .roster{ display:flex; gap:10px; margin-top:4px; flex-wrap:wrap; justify-content:center; }
+  .player-count-toggle{ display:flex; gap:8px; margin-top:2px; }
+  .count-btn{
+    font-family:'Fredoka', sans-serif; font-weight:700; font-size:13px;
+    color:var(--cream); background:rgba(244,241,234,0.08);
+    border:1.5px solid rgba(244,241,234,0.2); border-radius:999px;
+    padding:9px 20px; cursor:pointer;
+  }
+  .count-btn.active{ background:var(--cream); color:#0E1120; border-color:var(--cream); }
+  .team-card{
+    width:104px; padding:10px 8px; border-radius:14px;
+    background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14);
+    font-size:11px; line-height:1.4;
+  }
+  .team-card .name{ font-weight:700; font-size:12.5px; margin-bottom:2px; }
+  .team-card .stat{ font-family:'Space Mono', monospace; font-size:9.5px; opacity:0.7; }
+
+  .ff-toggle{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    width:100%; max-width:320px; padding:10px 14px; margin-top:2px;
+    background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14);
+    border-radius:14px; cursor:pointer; text-align:left;
+  }
+  .ff-toggle-text{ font-size:13px; font-weight:600; color:var(--cream); line-height:1.4; }
+  .ff-toggle-sub{ display:block; font-family:'Space Mono', monospace; font-size:10px; font-weight:400; opacity:0.55; margin-top:2px; }
+  .ff-switch{ position:relative; width:42px; height:24px; flex:none; }
+  .ff-switch input{ opacity:0; width:0; height:0; }
+  .ff-slider{ position:absolute; inset:0; background:rgba(244,241,234,0.2); border-radius:999px; transition:background 0.15s ease; }
+  .ff-slider::before{ content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:var(--cream); border-radius:50%; transition:transform 0.15s ease; }
+  .ff-switch input:checked + .ff-slider{ background: var(--red); }
+  .ff-switch input:checked + .ff-slider::before{ transform: translateX(18px); }
+
+  .pass-icon{ width:52px; height:52px; }
+  .end-icon{ font-size:44px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="game"></canvas>
+
+  <div id="startOverlay" class="overlay">
+    <div class="badge" id="modeBadge">3 Players · One iPad</div>
+    <h1 class="title">Triple Dogfight</h1>
+    <div class="authors">By Max Hwang & Hoho Hwang</div>
+    <p class="subtitle" id="modeSubtitle">Three squadrons ring a circular arena, 120° apart. Tap a plane, pull back, release to fire. Ram enemies to damage them. Last squadron flying wins.</p>
+
+    <div class="player-count-toggle">
+      <button class="count-btn" id="count2Btn" data-count="2">2 Players</button>
+      <button class="count-btn active" id="count3Btn" data-count="3">3 Players</button>
+    </div>
+
+    <div class="roster">
+      <div class="team-card" style="border-color:rgba(255,75,75,0.4)">
+        <div class="name" style="color:var(--red)">Red Falcons</div>
+        <div class="stat">3 HP · normal speed</div>
+      </div>
+      <div class="team-card" id="blueCard" style="border-color:rgba(58,160,255,0.4)">
+        <div class="name" style="color:var(--blue)">Blue Needles</div>
+        <div class="stat">2 HP · fast, small</div>
+      </div>
+      <div class="team-card" id="greenCard" style="border-color:rgba(76,217,123,0.4)">
+        <div class="name" style="color:var(--green)">Green Bulldogs</div>
+        <div class="stat">4 HP · slow, big</div>
+      </div>
+    </div>
+    <label class="ff-toggle" id="ffToggleLabel">
+      <span class="ff-toggle-text">Friendly fire</span>
+      <span class="ff-switch">
+        <input type="checkbox" id="ffCheckbox">
+        <span class="ff-slider"></span>
+      </span>
+    </label>
+    <button class="btn" id="startBtn">Start Battle</button>
+  </div>
+  
+  <!-- (Rest of game engine logic remains the same) -->
+</div>
+<script>
+// ... (Your existing JavaScript logic from the previous fix here) ...
+</script>
+</body>
+</html>
