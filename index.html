@@ -3,30 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Triple Dogfight</title>
+<title>Air Arena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&family=Space+Mono&display=swap" rel="stylesheet">
 <style>
-  :root{ --red: #FF4B4B; --red-dark:#B22E2E; --blue: #3AA0FF; --blue-dark:#1F5FA8; --green: #4CD97B; --green-dark:#2E8F4E; --cream: #F4F1EA; }
+  :root{
+    --red: #FF4B4B; --red-dark:#B22E2E;
+    --blue: #3AA0FF; --blue-dark:#1F5FA8;
+    --green: #4CD97B; --green-dark:#2E8F4E;
+    --cream: #F4F1EA;
+  }
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-  html,body{ margin:0; padding:0; width:100%; height:100%; overflow:hidden; overscroll-behavior:none; touch-action:none; background:#0A0E1C; font-family:'Fredoka', system-ui, sans-serif; }
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    overflow:hidden; overscroll-behavior:none; touch-action:none;
+    background:#0A0E1C;
+    font-family:'Fredoka', system-ui, sans-serif;
+  }
   #stage{ position:fixed; inset:0; }
   canvas{ display:block; width:100%; height:100%; touch-action:none; }
-  .overlay{ position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--cream); gap:14px; padding:24px; background:rgba(6,8,18,0.88); backdrop-filter: blur(3px); z-index:10; overflow-y:auto; }
+
+  .overlay{
+    position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    color:var(--cream); gap:14px; padding:24px;
+    background:rgba(6,8,18,0.88); backdrop-filter: blur(3px);
+    z-index:10; overflow-y:auto;
+  }
   .overlay.hidden{ display:none; }
-  .badge{ font-family:'Space Mono', monospace; font-size:12px; letter-spacing:2px; text-transform:uppercase; opacity:0.6; }
+  .badge{
+    font-family:'Space Mono', monospace; font-size:12px; letter-spacing:2px;
+    text-transform:uppercase; opacity:0.6;
+  }
   .title{ font-size:30px; font-weight:800; margin:2px 0; }
-  .authors{ font-size:14px; font-weight:600; opacity:0.7; margin-bottom:10px; }
   .subtitle{ font-size:14px; opacity:0.8; max-width:340px; line-height:1.5; margin:0; }
-  .btn{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:17px; color:#0E1120; border:none; border-radius:999px; padding:14px 34px; cursor:pointer; margin-top:8px; box-shadow:0 6px 0 rgba(0,0,0,0.3); transition: transform 0.08s ease; background: var(--cream); }
+  .author-credit{ font-family:'Space Mono', monospace; font-size:11px; opacity:0.55; margin:0; letter-spacing:0.5px; }
+  .btn{
+    font-family:'Fredoka', sans-serif; font-weight:700; font-size:17px;
+    color:#0E1120; border:none; border-radius:999px; padding:14px 34px;
+    cursor:pointer; margin-top:8px; box-shadow:0 6px 0 rgba(0,0,0,0.3);
+    transition: transform 0.08s ease; background: var(--cream);
+  }
   .btn:active{ transform: translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.3); }
+
   .roster{ display:flex; gap:10px; margin-top:4px; flex-wrap:wrap; justify-content:center; }
-  .count-btn{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:13px; color:var(--cream); background:rgba(244,241,234,0.08); border:1.5px solid rgba(244,241,234,0.2); border-radius:999px; padding:9px 20px; cursor:pointer; }
+
+  .player-count-toggle{ display:flex; gap:8px; margin-top:2px; }
+  .count-btn{
+    font-family:'Fredoka', sans-serif; font-weight:700; font-size:13px;
+    color:var(--cream); background:rgba(244,241,234,0.08);
+    border:1.5px solid rgba(244,241,234,0.2); border-radius:999px;
+    padding:9px 20px; cursor:pointer;
+  }
   .count-btn.active{ background:var(--cream); color:#0E1120; border-color:var(--cream); }
-  .team-card{ width:104px; padding:10px 8px; border-radius:14px; background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14); font-size:11px; line-height:1.4; }
+  .team-card{
+    width:104px; padding:10px 8px; border-radius:14px;
+    background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14);
+    font-size:11px; line-height:1.4;
+  }
   .team-card .name{ font-weight:700; font-size:12.5px; margin-bottom:2px; }
   .team-card .stat{ font-family:'Space Mono', monospace; font-size:9.5px; opacity:0.7; }
-  .ff-toggle{ display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%; max-width:320px; padding:10px 14px; margin-top:2px; background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14); border-radius:14px; cursor:pointer; text-align:left; }
+
+  .ff-toggle{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    width:100%; max-width:320px; padding:10px 14px; margin-top:2px;
+    background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.14);
+    border-radius:14px; cursor:pointer; text-align:left;
+  }
   .ff-toggle-text{ font-size:13px; font-weight:600; color:var(--cream); line-height:1.4; }
   .ff-toggle-sub{ display:block; font-family:'Space Mono', monospace; font-size:10px; font-weight:400; opacity:0.55; margin-top:2px; }
   .ff-switch{ position:relative; width:42px; height:24px; flex:none; }
@@ -35,6 +78,7 @@
   .ff-slider::before{ content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:var(--cream); border-radius:50%; transition:transform 0.15s ease; }
   .ff-switch input:checked + .ff-slider{ background: var(--red); }
   .ff-switch input:checked + .ff-slider::before{ transform: translateX(18px); }
+
   .pass-icon{ width:52px; height:52px; }
   .end-icon{ font-size:44px; }
 </style>
@@ -42,118 +86,1002 @@
 <body>
 <div id="stage">
   <canvas id="game"></canvas>
+
   <div id="startOverlay" class="overlay">
     <div class="badge" id="modeBadge">3 Players · One iPad</div>
-    <h1 class="title">Triple Dogfight</h1>
-    <div class="authors">By Max Hwang & Hoho Hwang</div>
-    <p class="subtitle" id="modeSubtitle">Three squadrons ring a circular arena, 120° apart. Tap a plane, pull back, release to fire. Ram enemies to damage them. Last squadron flying wins.</p>
+    <h1 class="title">Air Arena</h1>
+    <p class="author-credit">Author: Max Hwang &amp; Hoho Hwang</p>
+    <p class="subtitle" id="modeSubtitle">Three squadrons ring a circular arena, 120° apart — perfectly even ground no matter what shape the screen is. Tap a plane, pull back, release to fire. Ram enemies to damage them. Last squadron flying wins.</p>
+
     <div class="player-count-toggle">
       <button class="count-btn" id="count2Btn" data-count="2">2 Players</button>
       <button class="count-btn active" id="count3Btn" data-count="3">3 Players</button>
     </div>
+
     <div class="roster">
       <div class="team-card" style="border-color:rgba(255,75,75,0.4)">
         <div class="name" style="color:var(--red)">Red Falcons</div>
         <div class="stat">3 HP · normal speed</div>
+        <div class="stat">Explosive — blast hits nearby enemies (and teammates if FF is on), never itself</div>
       </div>
       <div class="team-card" id="blueCard" style="border-color:rgba(58,160,255,0.4)">
         <div class="name" style="color:var(--blue)">Blue Needles</div>
         <div class="stat">2 HP · fast, small</div>
+        <div class="stat">Rampage — can hit several planes per shot</div>
       </div>
       <div class="team-card" id="greenCard" style="border-color:rgba(76,217,123,0.4)">
         <div class="name" style="color:var(--green)">Green Bulldogs</div>
         <div class="stat">4 HP · slow, big</div>
+        <div class="stat">Heavy tank — leaves a poop trail that costs opponents 0.5 HP (never teammates)</div>
       </div>
     </div>
     <label class="ff-toggle" id="ffToggleLabel">
-      <span class="ff-toggle-text">Friendly fire</span>
-      <span class="ff-switch"><input type="checkbox" id="ffCheckbox"><span class="ff-slider"></span></span>
+      <span class="ff-toggle-text">Friendly fire <span class="ff-toggle-sub">(hitting your own squadron costs it 0.5 HP)</span></span>
+      <span class="ff-switch">
+        <input type="checkbox" id="ffCheckbox">
+        <span class="ff-slider"></span>
+      </span>
     </label>
     <button class="btn" id="startBtn">Start Battle</button>
   </div>
+
   <div id="passOverlay" class="overlay hidden">
-    <svg class="pass-icon" id="passIconSvg" viewBox="0 0 100 100"><polygon id="passTriangle" points="50,15 75,70 25,70" fill="#FF4B4B"/></svg>
+    <svg class="pass-icon" id="passIconSvg" viewBox="0 0 100 100">
+      <polygon id="passTriangle" points="50,15 75,70 25,70" fill="#FF4B4B"/>
+    </svg>
     <h1 class="title" id="passTitle">Pass to Red Falcons</h1>
+    <p class="subtitle">Hand the iPad over, then tap ready.</p>
     <button class="btn" id="passBtn">I'm Ready</button>
   </div>
+
   <div id="endOverlay" class="overlay hidden">
     <div class="end-icon" id="endIcon">🏆</div>
     <h1 class="title" id="endTitle">Red Falcons Win</h1>
+    <p class="subtitle" id="endSubtitle"></p>
     <button class="btn" id="restartBtn">Play Again</button>
   </div>
 </div>
+
 <script>
 (function(){
-  const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
-  let W, H, CX, CY, ARENA_R, planes=[], items=[], phase='idle', currentTeamIdx=0, playerCount=3, TEAMS=[], selected=null, dragStart=null, dragPoint=null, friendlyFire=false, cancelFlash=0;
-  
-  function resize(){
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * window.devicePixelRatio; canvas.height = H * window.devicePixelRatio;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
-    CX = W/2; CY = H/2; ARENA_R = Math.min(W,H) * 0.42;
-  }
-  window.addEventListener('resize', resize); resize();
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  let W, H, DPR, CX, CY, ARENA_R;
 
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    CX = W/2; CY = H/2;
+    ARENA_R = Math.min(W,H) * 0.42;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- Constants ----------
+  const BASE_PLANE_R = 20;
+  const FRICTION = 0.987;
+  const MIN_SPEED = 0.35;
+  const MAX_DRAG = 190;
+  const CANCEL_DRAG = 260;
+  const BASE_MAX_SPEED = 30;
+  const MIN_DRAG_TO_FIRE = 14;
+  const BOUNCE = 0.72;
+  const BLAST_RADIUS = 77; // 64 * 1.2, increased 20% per feedback
+
+  // base team definitions (angle gets recomputed per player-count when a battle starts)
   const TEAM_DEFS = {
-    red: { id:'red', name:'Red Falcons', color:'#FF4B4B', maxHp:3, speedMult:1.0, ability:'explosive' },
-    green: { id:'green', name:'Green Bulldogs', color:'#4CD97B', maxHp:4, speedMult:0.42, ability:'poop' },
-    blue: { id:'blue', name:'Blue Needles', color:'#3AA0FF', maxHp:2, speedMult:1.25, ability:'multihit' }
+    red:   { id:'red',   name:'Red Falcons',    color:'#FF4B4B', dark:'#B22E2E', maxHp:3, speedMult:1.0,  sizeMult:1.0,  shape:'falcon',  ability:'explosive' },
+    green: { id:'green', name:'Green Bulldogs', color:'#4CD97B', dark:'#2E8F4E', maxHp:4, speedMult:0.5,  sizeMult:1.2,  shape:'bulldog', ability:'poop'      },
+    blue:  { id:'blue',  name:'Blue Needles',   color:'#3AA0FF', dark:'#1F5FA8', maxHp:2, speedMult:1.25, sizeMult:0.8,  shape:'needle',  ability:'multihit'  }
   };
 
-  function startBattle(){
-    TEAMS = (playerCount === 2 ? ['red','blue'] : ['red','green','blue']).map((id, i) => Object.assign({angle: -Math.PI/2 + i * (2*Math.PI/playerCount)}, TEAM_DEFS[id]));
-    planes = TEAMS.flatMap(t => [-14,0,14].map(off => ({
-      owner: t.id, x: CX + Math.cos(t.angle + off*Math.PI/180)*ARENA_R, y: CY + Math.sin(t.angle + off*Math.PI/180)*ARENA_R,
-      vx:0, vy:0, alive:true, hp: t.maxHp, moving:false, angle: t.angle + Math.PI
-    })));
-    items = []; currentTeamIdx = 0; phase = 'idle';
+  let playerCount = 3;
+  let TEAMS = [];
+
+  function buildTeams(count){
+    // teams are placed evenly around the circle, 360/count degrees apart, starting at the top
+    const ids = count === 2 ? ['red','blue'] : ['red','green','blue'];
+    return ids.map((id, i) => {
+      const angle = -Math.PI/2 + i * (2*Math.PI/count);
+      return Object.assign({}, TEAM_DEFS[id], { angle });
+    });
+  }
+
+  function teamOf(id){ return TEAMS.find(t=>t.id===id); }
+
+  // ---------- State ----------
+  let planes = [];
+  let particles = [];
+  let shockwaves = [];
+  let damageTexts = [];
+  let items = [];
+  let roundsSinceItem = 0;
+  let nextItemThreshold = randInt(2,4);
+
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  let currentTeamIdx = 0;
+  let phase = 'menu'; // menu, idle, aiming, flying, transition, gameover
+  let selected = null;
+  let dragStart = null;
+  let dragPoint = null;
+  let winner = null;
+  let friendlyFire = false;
+  let shake = 0;
+  let cancelFlash = 0;
+  let isLiveOverdrawn = false;
+
+  function makePlanes(){
+    planes = [];
+    TEAMS.forEach(team=>{
+      [-14, 0, 14].forEach((offsetDeg, i)=>{
+        const a = team.angle + offsetDeg * Math.PI/180;
+        const x = CX + Math.cos(a) * ARENA_R;
+        const y = CY + Math.sin(a) * ARENA_R;
+        planes.push({
+          id: team.id+'-'+i, owner: team.id, x, y, vx:0, vy:0,
+          angle: team.angle + Math.PI, // face inward toward center
+          alive:true, moving:false, hp: team.maxHp, hasHit:false, hitTargets: new Set()
+        });
+      });
+    });
+  }
+
+  function alivePlanes(ownerId){ return planes.filter(p=>p.owner===ownerId && p.alive); }
+  function aliveTeams(){ return TEAMS.filter(t=>alivePlanes(t.id).length>0); }
+
+  // ---------- Input helpers ----------
+  function worldPoint(clientX, clientY){
+    const rect = canvas.getBoundingClientRect();
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function planeAt(pt){
+    const currentTeam = TEAMS[currentTeamIdx];
+    let best = null, bestD = 9999;
+    for (const p of planes){
+      if (!p.alive || p.owner !== currentTeam.id || p.moving) continue;
+      const r = BASE_PLANE_R * teamOf(p.owner).sizeMult;
+      const d = Math.hypot(p.x-pt.x, p.y-pt.y);
+      if (d < r*1.9 && d < bestD){ best = p; bestD = d; }
+    }
+    return best;
+  }
+
+  // ---------- Input events (touch + mouse) ----------
+  function eventXY(e){
+    if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function onDown(e){
+    if (phase !== 'idle') return;
+    const xy = eventXY(e);
+    const pt = worldPoint(xy.x, xy.y);
+    const p = planeAt(pt);
+    if (p){
+      selected = p;
+      dragStart = {x:p.x, y:p.y};
+      dragPoint = {x:p.x, y:p.y};
+      phase = 'aiming';
+      e.preventDefault();
+    }
+  }
+
+  function onMove(e){
+    if (phase !== 'aiming') return;
+    const xy = eventXY(e);
+    dragPoint = worldPoint(xy.x, xy.y);
+    e.preventDefault();
+  }
+
+  function onUp(e){
+    if (phase !== 'aiming' || !selected) return;
+    const xy = eventXY(e);
+    const pt = worldPoint(xy.x, xy.y);
+    const dx = pt.x - dragStart.x;
+    const dy = pt.y - dragStart.y;
+    const len = Math.hypot(dx,dy);
+
+    if (len < MIN_DRAG_TO_FIRE){
+      selected = null; dragStart = null; dragPoint = null;
+      phase = 'idle';
+      return;
+    }
+    if (len > CANCEL_DRAG){
+      if (navigator.vibrate) { try{ navigator.vibrate([15,40,15]); }catch(err){} }
+      selected = null; dragStart = null; dragPoint = null;
+      phase = 'idle';
+      cancelFlash = 24;
+      e.preventDefault();
+      return;
+    }
+    const clamped = Math.min(len, MAX_DRAG);
+    const team = teamOf(selected.owner);
+    const speed = (clamped / MAX_DRAG) * BASE_MAX_SPEED * team.speedMult;
+    const nx = dx/len, ny = dy/len;
+    selected.vx = nx * speed;
+    selected.vy = ny * speed;
+    selected.angle = Math.atan2(ny, nx);
+    selected.moving = true;
+    selected.hasHit = false;
+    selected.hitTargets.clear();
+    selected.lastPoopX = selected.x;
+    selected.lastPoopY = selected.y;
+    phase = 'flying';
+    selected = null; dragStart = null; dragPoint = null;
+    e.preventDefault();
+  }
+
+  canvas.addEventListener('touchstart', onDown, {passive:false});
+  canvas.addEventListener('touchmove', onMove, {passive:false});
+  canvas.addEventListener('touchend', onUp, {passive:false});
+  canvas.addEventListener('touchcancel', onUp, {passive:false});
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup', onUp);
+
+  // ---------- Physics / collisions ----------
+  function explode(x,y,ownerColor){
+    for (let i=0;i<18;i++){
+      const a = Math.random()*Math.PI*2;
+      const sp = 2 + Math.random()*4;
+      particles.push({ x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life: 26+Math.random()*10, maxLife:36,
+        color: Math.random()<0.5 ? '#FFD23F' : (Math.random()<0.5 ? '#FF4B3E' : ownerColor) });
+    }
+    shake = 10;
+    if (navigator.vibrate) { try{ navigator.vibrate(40); }catch(err){} }
+  }
+  function sparkHit(x,y,ownerColor){
+    for (let i=0;i<8;i++){
+      const a = Math.random()*Math.PI*2;
+      const sp = 1.5 + Math.random()*2.5;
+      particles.push({ x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:14+Math.random()*6, maxLife:20,
+        color: Math.random()<0.6 ? '#FFD23F' : ownerColor });
+    }
+    shake = Math.max(shake, 4);
+    if (navigator.vibrate) { try{ navigator.vibrate(15); }catch(err){} }
+  }
+  function spawnShockwave(x,y,color){
+    shockwaves.push({ x, y, r:4, maxR: BLAST_RADIUS, life:22, maxLife:22, color, flashLife:9, flashMaxLife:9 });
+    shake = 14;
+    if (navigator.vibrate) { try{ navigator.vibrate([20,30,50]); }catch(err){} }
+  }
+
+  function spawnDamageText(x,y,amount,customLabel){
+    const isHeal = amount > 0;
+    const label = customLabel || ((isHeal ? '+' : '') + (Number.isInteger(amount) ? amount : amount.toFixed(1)));
+    const color = customLabel ? '#F4F1EA' : (isHeal ? '#4CD97B' : '#FF6B6B');
+    damageTexts.push({ x, y, vy:-0.7, life:44, maxLife:44, text: label, color });
+  }
+
+  function endTurnCheck(){
+    const alive = aliveTeams();
+    if (alive.length === 0){ winner = 'draw'; phase = 'gameover'; showEnd(); return true; }
+    if (alive.length === 1){ winner = alive[0].id; phase = 'gameover'; showEnd(); return true; }
+    return false;
+  }
+
+  function spawnItem(){
+    const bombExists = items.some(it => it.type === 'bomb');
+    // only one bomb allowed on the field at a time — if one's already out, spawn a heal instead
+    const type = (!bombExists && Math.random() < 0.5) ? 'bomb' : 'heal';
+    const angle = Math.random()*Math.PI*2;
+    const dist = Math.random()*(ARENA_R - 50);
+    const item = { x: CX+Math.cos(angle)*dist, y: CY+Math.sin(angle)*dist, type, r:16, spawnAt: Date.now() };
+    if (type === 'bomb') item.turnsLeft = TEAMS.length; // bomb disappears after one full round if untouched
+    items.push(item);
+  }
+
+  function switchTurn(){
+    if (endTurnCheck()) return;
+    let tries = 0;
+    do {
+      currentTeamIdx = (currentTeamIdx + 1) % TEAMS.length;
+      tries++;
+    } while (alivePlanes(TEAMS[currentTeamIdx].id).length === 0 && tries <= TEAMS.length);
+
+    // poop hazards and the bomb item expire after one full round (once every team has had a turn)
+    // — healing items are NOT included here, so they persist on the field until someone picks them up
+    for (let i=items.length-1; i>=0; i--){
+      const it = items[i];
+      if (it.type !== 'poop' && it.type !== 'bomb') continue;
+      it.turnsLeft--;
+      if (it.turnsLeft <= 0) items.splice(i,1);
+    }
+
+    roundsSinceItem++;
+    if (roundsSinceItem >= nextItemThreshold){
+      spawnItem();
+      roundsSinceItem = 0;
+      nextItemThreshold = randInt(2,4);
+    }
+
+    phase = 'transition';
+    showPass();
   }
 
   function updatePhysics(){
-    for (const p of planes.filter(p => p.alive && p.moving)){
-      p.x += p.vx; p.y += p.vy; p.vx *= 0.987; p.vy *= 0.987;
-      if (Math.hypot(p.vx, p.vy) < 0.35){ p.vx=p.vy=0; p.moving=false; switchTurn(); }
-      items.forEach((item, i) => {
-        if (item.type === 'poop' && Math.hypot(p.x-item.x, p.y-item.y) < 20 && p.owner !== item.owner){
-          p.hp -= 0.1;
-          if (p.hp <= 0){ p.alive = false; p.vx=p.vy=0; p.moving=false; items.splice(i,1); switchTurn(); return; }
+    for (const p of planes){
+      if (!p.alive || !p.moving) continue;
+      const team = teamOf(p.owner);
+      const r = BASE_PLANE_R * team.sizeMult;
+
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= FRICTION; p.vy *= FRICTION;
+
+      // circular arena wall bounce
+      const dxc = p.x - CX, dyc = p.y - CY;
+      const distC = Math.hypot(dxc, dyc);
+      if (distC + r > ARENA_R){
+        const nx = dxc/distC, ny = dyc/distC;
+        const vDotN = p.vx*nx + p.vy*ny;
+        p.vx -= 2*vDotN*nx; p.vy -= 2*vDotN*ny;
+        p.vx *= BOUNCE; p.vy *= BOUNCE;
+        const overlap = (distC + r) - ARENA_R;
+        p.x -= nx*overlap; p.y -= ny*overlap;
+        shake = Math.max(shake,3);
+      }
+
+      const speed = Math.hypot(p.vx,p.vy);
+      if (speed > 0.01) p.angle = Math.atan2(p.vy,p.vx);
+
+      // item pickups (healing, bomb, or poop hazard) — checked regardless of hasHit, since these aren't attacks on other planes
+      for (let ii = items.length-1; ii>=0; ii--){
+        const item = items[ii];
+        const di = Math.hypot(p.x-item.x, p.y-item.y);
+        if (di < r + item.r){
+          if (item.type === 'heal'){
+            const healed = Math.min(team.maxHp, p.hp+1) - p.hp;
+            p.hp = Math.min(team.maxHp, p.hp+1);
+            if (healed > 0){
+              spawnDamageText(p.x, p.y - r - 6, healed);
+            } else {
+              spawnDamageText(p.x, p.y - r - 6, 0, 'FULL HP');
+            }
+            sparkHit(item.x, item.y, '#4CD97B');
+          } else if (item.type === 'bomb'){
+            // bomb — hits EVERY plane in range, no team immunity, including whoever triggered it
+            spawnShockwave(item.x, item.y, '#FF8A3D');
+            for (const c of planes){
+              if (!c.alive) continue;
+              const dc = Math.hypot(c.x-item.x, c.y-item.y);
+              if (dc > BLAST_RADIUS) continue;
+              c.hp -= 1;
+              spawnDamageText(c.x, c.y - BASE_PLANE_R*teamOf(c.owner).sizeMult - 6, -1);
+              if (c.hp <= 0){
+                explode(c.x, c.y, '#FF8A3D');
+                c.alive = false;
+              } else {
+                sparkHit(c.x, c.y, '#FF8A3D');
+              }
+            }
+          } else if (item.type === 'poop'){
+            // poop hazard — only hurts opponents of the team that dropped it, never that team's own planes, never affected by the friendly fire toggle
+            if (p.owner !== item.owner){
+              p.hp -= 0.1;
+              spawnDamageText(p.x, p.y - r - 6, -0.1);
+              sparkHit(p.x, p.y, '#8B5A2B');
+              if (p.hp <= 0){
+                explode(p.x, p.y, '#8B5A2B');
+                p.alive = false;
+              }
+              items.splice(ii,1);
+            }
+            continue; // don't fall through to the generic removal below (poop only removed when it actually hits someone)
+          }
+          items.splice(ii,1);
+          break;
         }
-      });
-      if (p.moving && TEAM_DEFS[p.owner].ability === 'poop' && (!p.lastPoopX || Math.hypot(p.x - p.lastPoopX, p.y - p.lastPoopY) >= 60)){
-        p.lastPoopX = p.x; p.lastPoopY = p.y; items.push({ x:p.x, y:p.y, type:'poop', owner:p.owner });
+      }
+
+      // if this plane died from an item this frame (poop, or its own bomb pickup), properly end its turn now
+      // instead of leaving it "moving" forever with nothing ever calling switchTurn — that was the freeze bug
+      if (!p.alive){
+        p.moving = false;
+        switchTurn();
+        return;
+      }
+
+      // Green's poop trail — drop a hazard behind it based on distance traveled, so spacing stays even even as it slows down
+      if (team.ability === 'poop'){
+        if (p.lastPoopX === undefined){ p.lastPoopX = p.x; p.lastPoopY = p.y; }
+        const distSincePoop = Math.hypot(p.x - p.lastPoopX, p.y - p.lastPoopY);
+        if (distSincePoop >= 45){
+          p.lastPoopX = p.x; p.lastPoopY = p.y;
+          items.push({ x:p.x, y:p.y, type:'poop', owner:p.owner, r:13, turnsLeft: TEAMS.length });
+        }
+      }
+
+      if (speed < MIN_SPEED){
+        p.vx = 0; p.vy = 0; p.moving = false;
+        switchTurn();
+        return;
+      }
+
+      for (const q of planes){
+        if (team.ability !== 'multihit' && p.hasHit) break; // already scored a hit this flight — can't hit anyone else
+        if (q === p || !q.alive) continue;
+        if (team.ability === 'multihit' && p.hitTargets.has(q.id)) continue; // multihit can't re-hit the same plane twice
+        const isEnemy = q.owner !== p.owner;
+        if (!isEnemy && !friendlyFire) continue;
+        const qTeam = teamOf(q.owner);
+        const qr = BASE_PLANE_R * qTeam.sizeMult;
+        const d = Math.hypot(p.x-q.x, p.y-q.y);
+        if (d < (r+qr)*0.75){
+          if (team.ability === 'explosive'){
+            // area blast at the impact point — hits enemies always, teammates only if friendly fire is on, but never the shooter itself
+            spawnShockwave(q.x, q.y, team.color);
+            for (const c of planes){
+              if (c === p) continue; // the shooter itself is immune to its own blast
+              if (!c.alive) continue;
+              const dc = Math.hypot(c.x-q.x, c.y-q.y);
+              if (dc > BLAST_RADIUS) continue;
+              const isEnemyC = c.owner !== p.owner;
+              if (!isEnemyC && !friendlyFire) continue;
+              const dmgC = isEnemyC ? 0.5 : 0.25;
+              c.hp -= dmgC;
+              spawnDamageText(c.x, c.y - BASE_PLANE_R*teamOf(c.owner).sizeMult - 6, -dmgC);
+              if (c.hp <= 0){
+                explode(c.x, c.y, team.color);
+                c.alive = false;
+              } else {
+                sparkHit(c.x, c.y, team.color);
+              }
+            }
+            p.hasHit = true;
+          } else {
+            const dmg = isEnemy ? 1 : 0.5;
+            q.hp -= dmg;
+            spawnDamageText(q.x, q.y - qr - 6, -dmg);
+            if (q.hp <= 0){
+              explode(q.x, q.y, team.color);
+              q.alive = false;
+            } else {
+              sparkHit(q.x, q.y, team.color);
+            }
+            if (team.ability === 'multihit'){ p.hitTargets.add(q.id); }
+            else { p.hasHit = true; } // keep flying on the original trajectory, but no more hits this turn
+          }
+        }
       }
     }
   }
 
-  function switchTurn(){ 
-    if(planes.filter(p=>p.alive).length > 1){
-      currentTeamIdx = (currentTeamIdx + 1) % playerCount;
-      phase = 'transition';
-      document.getElementById('passTitle').textContent = 'Pass to ' + TEAMS[currentTeamIdx].name;
-      document.getElementById('passOverlay').classList.remove('hidden');
+  function updateParticles(){
+    for (let i=particles.length-1;i>=0;i--){
+      const pt = particles[i];
+      pt.x += pt.vx; pt.y += pt.vy; pt.vx*=0.95; pt.vy*=0.95;
+      pt.life--;
+      if (pt.life<=0) particles.splice(i,1);
+    }
+    for (let i=shockwaves.length-1;i>=0;i--){
+      const sw = shockwaves[i];
+      sw.r += sw.maxR/sw.maxLife;
+      sw.life--;
+      if (sw.flashLife > 0) sw.flashLife--;
+      if (sw.life<=0) shockwaves.splice(i,1);
+    }
+    for (let i=damageTexts.length-1;i>=0;i--){
+      const dt = damageTexts[i];
+      dt.y += dt.vy;
+      dt.life--;
+      if (dt.life<=0) damageTexts.splice(i,1);
+    }
+    if (shake>0) shake *= 0.85;
+    if (shake < 0.2) shake = 0;
+  }
+
+  // ---------- Drawing ----------
+  function drawBackdrop(){
+    ctx.fillStyle = '#0A0E1C';
+    ctx.fillRect(0,0,W,H);
+
+    // team-tinted wedges inside the arena — half-angle scales with team count
+    // (90° each = a half-circle split for 2 players, 60° each = 120° wedge for 3)
+    const wedgeHalf = Math.PI / TEAMS.length;
+    TEAMS.forEach(team=>{
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(CX,CY);
+      ctx.arc(CX, CY, ARENA_R, team.angle - wedgeHalf, team.angle + wedgeHalf);
+      ctx.closePath();
+      ctx.fillStyle = team.color;
+      ctx.globalAlpha = 0.06;
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // arena boundary ring
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(CX, CY, ARENA_R, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(244,241,234,0.22)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([10,10]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // center dot
+    ctx.beginPath();
+    ctx.arc(CX,CY,4,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(244,241,234,0.3)';
+    ctx.fill();
+  }
+
+  function drawJetShape(team, r){
+    const c = team.color, d = team.dark;
+    ctx.fillStyle = c;
+    if (team.shape === 'falcon'){
+      // sleek fuselage — sharp nose tapering to a narrow tail
+      ctx.beginPath();
+      ctx.moveTo(0,-1.35*r);
+      ctx.lineTo(0.16*r,-0.25*r);
+      ctx.lineTo(0.11*r,0.5*r);
+      ctx.lineTo(0,0.72*r);
+      ctx.lineTo(-0.11*r,0.5*r);
+      ctx.lineTo(-0.16*r,-0.25*r);
+      ctx.closePath(); ctx.fill();
+
+      // shaded left half of fuselage for depth
+      ctx.beginPath();
+      ctx.moveTo(0,-1.35*r); ctx.lineTo(0,0.72*r);
+      ctx.lineTo(-0.11*r,0.5*r); ctx.lineTo(-0.16*r,-0.25*r);
+      ctx.closePath(); ctx.fillStyle = d; ctx.globalAlpha=0.5; ctx.fill(); ctx.globalAlpha=1;
+
+      // broad swept delta wings
+      ctx.fillStyle = c;
+      ctx.beginPath();
+      ctx.moveTo(0.13*r,-0.05*r); ctx.lineTo(1.05*r,0.55*r); ctx.lineTo(0.42*r,0.62*r); ctx.lineTo(0.1*r,0.2*r);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-0.13*r,-0.05*r); ctx.lineTo(-1.05*r,0.55*r); ctx.lineTo(-0.42*r,0.62*r); ctx.lineTo(-0.1*r,0.2*r);
+      ctx.closePath(); ctx.fillStyle = d; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+
+      // twin outward-angled tail fins
+      ctx.fillStyle = d;
+      ctx.beginPath();
+      ctx.moveTo(0.07*r,0.35*r); ctx.lineTo(0.38*r,0.78*r); ctx.lineTo(0.1*r,0.62*r);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-0.07*r,0.35*r); ctx.lineTo(-0.38*r,0.78*r); ctx.lineTo(-0.1*r,0.62*r);
+      ctx.closePath(); ctx.fill();
+
+      // underslung bomb payload — the signature "bomb plane" detail
+      ctx.save();
+      ctx.translate(0, 0.28*r);
+      ctx.beginPath(); ctx.ellipse(0,0,0.1*r,0.22*r,0,0,Math.PI*2);
+      ctx.fillStyle = '#2A1810'; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-0.08*r,0.16*r); ctx.lineTo(0,0.34*r); ctx.lineTo(0.08*r,0.16*r);
+      ctx.closePath(); ctx.fillStyle = '#2A1810'; ctx.fill();
+      ctx.beginPath(); ctx.arc(-0.02*r,-0.08*r,0.035*r,0,Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fill();
+      ctx.restore();
+
+      // cockpit canopy glow
+      ctx.beginPath(); ctx.ellipse(0,-0.7*r,0.11*r,0.2*r,0,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill();
+
+      // engine exhaust flame at the tail
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(-0.06*r,0.7*r); ctx.lineTo(0,0.98*r); ctx.lineTo(0.06*r,0.7*r);
+      ctx.closePath();
+      ctx.fillStyle = '#FFD23F'; ctx.fill();
+      ctx.restore();
+    } else if (team.shape === 'needle'){
+      ctx.beginPath();
+      ctx.moveTo(0,-1.3*r); ctx.lineTo(0.22*r,0.3*r); ctx.lineTo(0,0.5*r); ctx.lineTo(-0.22*r,0.3*r);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-0.05*r,-0.1*r); ctx.lineTo(-0.75*r,0.25*r); ctx.lineTo(-0.05*r,0.2*r);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0.05*r,-0.1*r); ctx.lineTo(0.75*r,0.25*r); ctx.lineTo(0.05*r,0.2*r);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0.06*r,0.25*r); ctx.lineTo(0.3*r,0.55*r); ctx.lineTo(0.06*r,0.45*r);
+      ctx.closePath(); ctx.fillStyle=d; ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-0.06*r,0.25*r); ctx.lineTo(-0.3*r,0.55*r); ctx.lineTo(-0.06*r,0.45*r);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.arc(0,-0.4*r,0.13*r,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill();
+    } else { // bulldog
+      ctx.beginPath();
+      ctx.ellipse(0,-0.15*r,0.55*r,0.85*r,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-0.5*r,0.15*r); ctx.lineTo(-1.15*r,0.55*r); ctx.lineTo(-0.85*r,0.6*r); ctx.lineTo(-0.45*r,0.35*r);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0.5*r,0.15*r); ctx.lineTo(1.15*r,0.55*r); ctx.lineTo(0.85*r,0.6*r); ctx.lineTo(0.45*r,0.35*r);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.arc(-0.55*r,0.62*r,0.22*r,0,Math.PI*2); ctx.fillStyle=d; ctx.fill();
+      ctx.beginPath(); ctx.arc(0.55*r,0.62*r,0.22*r,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0,-0.35*r,0.2*r,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill();
     }
   }
 
-  function loop(){ 
-    if (phase === 'flying') updatePhysics();
-    ctx.clearRect(0,0,W*window.devicePixelRatio, H*window.devicePixelRatio);
-    planes.forEach(p => { if(p.alive) { ctx.fillStyle=TEAM_DEFS[p.owner].color; ctx.fillRect(p.x-10, p.y-10, 20, 20); } });
-    requestAnimationFrame(loop); 
+  function drawPlane(p){
+    if (!p.alive) return;
+    const team = teamOf(p.owner);
+    const r = BASE_PLANE_R * team.sizeMult;
+    const isSelected = selected === p;
+    const dimIt = phase === 'aiming' && !isSelected;
+
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.angle + Math.PI/2);
+    ctx.globalAlpha = dimIt ? 0.25 : 1;
+
+    if (isSelected){
+      const pulse = 8 + Math.sin(Date.now()/140)*4;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(0,0,r+pulse+6,0,Math.PI*2);
+      ctx.strokeStyle = team.color; ctx.globalAlpha=0.25; ctx.lineWidth=3; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,r+pulse,0,Math.PI*2);
+      ctx.strokeStyle = '#FFFFFF'; ctx.globalAlpha=0.85; ctx.lineWidth=2.5; ctx.stroke();
+      ctx.restore();
+    }
+
+    drawJetShape(team, r);
+    ctx.restore();
+
+    // HP bar
+    const maxHp = team.maxHp;
+    const segW = 9, segH = 4, gap = 2.5;
+    const totalW = segW*maxHp + gap*(maxHp-1);
+    const barY = p.y + r + 12;
+    const barX0 = p.x - totalW/2;
+    ctx.save();
+    ctx.globalAlpha = dimIt ? 0.25 : 1;
+    for (let i=0;i<maxHp;i++){
+      const sx = barX0 + i*(segW+gap);
+      const fillFrac = Math.max(0, Math.min(1, p.hp - i));
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(sx, barY, segW, segH, 2); else ctx.rect(sx, barY, segW, segH);
+      ctx.fillStyle = 'rgba(244,241,234,0.18)'; ctx.fill();
+      if (fillFrac > 0){
+        const fw = segW*fillFrac;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(sx, barY, fw, segH, 2); else ctx.rect(sx, barY, fw, segH);
+        ctx.fillStyle = team.color; ctx.fill();
+      }
+    }
+    ctx.restore();
+
+    if (isSelected){
+      ctx.save();
+      const bob = Math.sin(Date.now()/220)*3;
+      ctx.translate(p.x, p.y - r - 26 + bob);
+      ctx.font = "700 12px 'Fredoka', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('READY — DRAG TO FIRE', 0, 0);
+      ctx.restore();
+    }
   }
-  
-  document.getElementById('count2Btn').addEventListener('click', () => { playerCount=2; document.getElementById('count2Btn').classList.add('active'); document.getElementById('count3Btn').classList.remove('active'); });
-  document.getElementById('count3Btn').addEventListener('click', () => { playerCount=3; document.getElementById('count3Btn').classList.add('active'); document.getElementById('count2Btn').classList.remove('active'); });
-  document.getElementById('startBtn').addEventListener('click', () => { startBattle(); document.getElementById('startOverlay').classList.add('hidden'); });
-  document.getElementById('passBtn').addEventListener('click', () => { document.getElementById('passOverlay').classList.add('hidden'); phase='idle'; });
-  
-  canvas.addEventListener('mousedown', (e) => { 
-    if(phase==='idle'){ 
-      let p = planes.find(p=>p.alive && p.owner===TEAMS[currentTeamIdx].id && Math.hypot(p.x-(e.clientX), p.y-(e.clientY))<40);
-      if(p){ phase='flying'; p.vx = (Math.random()-0.5)*20; p.vy = (Math.random()-0.5)*20; p.moving=true; }
-    } 
+
+  function drawAim(){
+    isLiveOverdrawn = false;
+    if (phase !== 'aiming' || !dragStart || !dragPoint) return;
+    const dx = dragPoint.x-dragStart.x, dy = dragPoint.y-dragStart.y;
+    const rawLen = Math.hypot(dx,dy);
+    const len = Math.min(rawLen, MAX_DRAG);
+    const angle = Math.atan2(dy,dx);
+    const ex = dragStart.x + Math.cos(angle)*len;
+    const ey = dragStart.y + Math.sin(angle)*len;
+    const power = len / MAX_DRAG;
+    const overdrawn = rawLen > CANCEL_DRAG;
+    isLiveOverdrawn = overdrawn;
+
+    // continuous green -> yellow -> orange -> red gradient (not just 3 buckets), so any change in
+    // pull distance is immediately visible, not only near the old thresholds
+    const hue = 120 - power*120;
+    const col = `hsl(${hue}, 92%, ${58 - power*10}%)`;
+    // thicker line and tighter dashes the harder you pull — a second, independent cue besides color
+    const lineW = 4 + power*9;
+    const dashLen = 3 + power*5;
+    const gapLen = 14 - power*8;
+
+    ctx.save();
+    ctx.strokeStyle = col; ctx.lineWidth = lineW; ctx.lineCap='round';
+    ctx.setLineDash([dashLen, gapLen]);
+    ctx.beginPath(); ctx.moveTo(dragStart.x,dragStart.y); ctx.lineTo(ex,ey); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(ex,ey,7+power*5,0,Math.PI*2); ctx.fillStyle = col; ctx.fill();
+    ctx.restore();
+
+    // numeric power readout right at the tip — removes any ambiguity about how hard the shot will be
+    ctx.save();
+    const labelOffset = 22 + power*6;
+    const lx = ex + Math.cos(angle)*labelOffset;
+    const ly = ey + Math.sin(angle)*labelOffset;
+    ctx.font = "800 14px 'Fredoka', sans-serif";
+    ctx.textAlign = 'center';
+    ctx.strokeStyle = 'rgba(10,10,15,0.75)';
+    ctx.lineWidth = 3;
+    const pctText = Math.round(power*100) + '%';
+    ctx.strokeText(pctText, lx, ly);
+    ctx.fillStyle = col;
+    ctx.fillText(pctText, lx, ly);
+    ctx.restore();
+
+    if (rawLen > MAX_DRAG){
+      const dragLen = Math.min(rawLen, CANCEL_DRAG + 40);
+      const dragEx = dragStart.x + Math.cos(angle)*dragLen;
+      const dragEy = dragStart.y + Math.sin(angle)*dragLen;
+      const warnCol = overdrawn ? (Math.sin(Date.now()/90) > 0 ? '#FF3B3B' : '#FFFFFF') : 'rgba(244,241,234,0.4)';
+      ctx.save();
+      ctx.strokeStyle = warnCol; ctx.lineWidth = overdrawn ? 3 : 2; ctx.lineCap='round';
+      ctx.setLineDash([3,7]);
+      ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(dragEx,dragEy); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+  }
+
+  function drawParticles(){
+    for (const pt of particles){
+      ctx.globalAlpha = Math.max(pt.life/pt.maxLife,0);
+      ctx.beginPath(); ctx.arc(pt.x,pt.y, 4*(pt.life/pt.maxLife)+1, 0, Math.PI*2);
+      ctx.fillStyle = pt.color; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    for (const sw of shockwaves){
+      const alpha = Math.max(sw.life/sw.maxLife, 0);
+      if (sw.flashLife > 0){
+        const flashAlpha = sw.flashLife / sw.flashMaxLife;
+        ctx.save();
+        ctx.globalAlpha = flashAlpha * 0.35;
+        ctx.fillStyle = sw.color;
+        ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.maxR, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = flashAlpha * 0.9;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.maxR, 0, Math.PI*2); ctx.stroke();
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.8;
+      ctx.strokeStyle = sw.color;
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI*2); ctx.stroke();
+      ctx.globalAlpha = alpha * 0.15;
+      ctx.fillStyle = sw.color;
+      ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    for (const dt of damageTexts){
+      const alpha = Math.max(dt.life/dt.maxLife, 0);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = "800 15px 'Fredoka', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = 'rgba(10,10,15,0.7)';
+      ctx.lineWidth = 3;
+      ctx.strokeText(dt.text, dt.x, dt.y);
+      ctx.fillStyle = dt.color;
+      ctx.fillText(dt.text, dt.x, dt.y);
+      ctx.restore();
+    }
+  }
+
+  function drawHUD(){
+    TEAMS.forEach(team=>{
+      const labelR = ARENA_R + 30;
+      const lx = CX + Math.cos(team.angle)*labelR;
+      const ly = CY + Math.sin(team.angle)*labelR;
+      ctx.save();
+      ctx.font = "700 13px 'Fredoka', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.fillStyle = team.color;
+      const count = alivePlanes(team.id).length;
+      ctx.fillText(team.name.split(' ')[0].toUpperCase() + '  ' + '✈'.repeat(count) + '·'.repeat(3-count), lx, ly);
+      ctx.restore();
+    });
+
+    if (friendlyFire){
+      ctx.save();
+      ctx.font = "600 10px 'Space Mono', monospace";
+      ctx.fillStyle = 'rgba(255,210,63,0.85)';
+      ctx.textAlign = 'left';
+      ctx.fillText('⚠ FRIENDLY FIRE ON', 12, H-14);
+      ctx.restore();
+    }
+
+    // compass needle pointing at the current team's zone
+    const team = TEAMS[currentTeamIdx];
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.rotate(team.angle + Math.PI/2);
+    ctx.fillStyle = team.color;
+    ctx.beginPath();
+    ctx.moveTo(0,-16); ctx.lineTo(-8,4); ctx.lineTo(8,4);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.font = "700 13px 'Space Mono', monospace";
+    ctx.fillStyle = 'rgba(244,241,234,0.7)';
+    ctx.textAlign = 'center';
+    ctx.fillText(team.name.toUpperCase() + "'S TURN", CX, CY+34);
+    ctx.restore();
+  }
+
+  function drawItems(){
+    const pulse = 1 + Math.sin(Date.now()/300)*0.12;
+    for (const item of items){
+      ctx.save();
+      ctx.translate(item.x, item.y);
+      if (item.type === 'poop'){
+        // small static trail hazard — no pulsing, just a plain cartoon marker
+        const fadeAlpha = Math.min(1, item.turnsLeft / TEAMS.length + 0.3);
+        ctx.globalAlpha = fadeAlpha;
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💩', 0, 1);
+        ctx.restore();
+        continue;
+      }
+      ctx.scale(pulse, pulse);
+      if (item.type === 'heal'){
+        ctx.beginPath(); ctx.arc(0,0,item.r,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(76,217,123,0.18)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(0,0,item.r,0,Math.PI*2);
+        ctx.strokeStyle = '#4CD97B'; ctx.lineWidth = 2.5; ctx.stroke();
+        ctx.fillStyle = '#4CD97B';
+        ctx.fillRect(-2.5, -9, 5, 18);
+        ctx.fillRect(-9, -2.5, 18, 5);
+      } else {
+        ctx.beginPath(); ctx.arc(0,0,item.r,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(255,138,61,0.18)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(0,0,item.r,0,Math.PI*2);
+        ctx.strokeStyle = '#FF8A3D'; ctx.lineWidth = 2.5; ctx.stroke();
+        ctx.beginPath(); ctx.arc(0,1,7,0,Math.PI*2);
+        ctx.fillStyle = '#2A1810'; ctx.fill();
+        ctx.strokeStyle = '#FF8A3D'; ctx.lineWidth = 2; ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(4,-4); ctx.lineTo(9,-11); ctx.stroke();
+        ctx.beginPath(); ctx.arc(9,-13,2.2,0,Math.PI*2); ctx.fillStyle='#FFD23F'; ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function render(){
+    ctx.save();
+    if (shake > 0) ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
+    drawBackdrop();
+    drawItems();
+    for (const p of planes) drawPlane(p);
+    drawAim();
+    drawParticles();
+    if (phase==='idle' || phase==='aiming' || phase==='flying') drawHUD();
+    ctx.restore();
+
+    if (isLiveOverdrawn || cancelFlash > 0){
+      const pulse = Math.sin(Date.now()/70) > 0;
+      const alpha = isLiveOverdrawn ? 1 : Math.min(1, cancelFlash/10);
+      const message = isLiveOverdrawn ? 'TOO FAR — RELEASE WILL CANCEL' : 'TOO FAR — SHOT CANCELED';
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = pulse ? '#FF3B3B' : '#FFFFFF';
+      ctx.lineWidth = 14;
+      ctx.strokeRect(7,7,W-14,H-14);
+      ctx.restore();
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = 'rgba(20,8,10,0.82)';
+      ctx.fillRect(0,0,W,46);
+      ctx.font = "800 15px 'Fredoka', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.fillStyle = pulse ? '#FF3B3B' : '#FFFFFF';
+      ctx.fillText(message, W/2, 29);
+      ctx.restore();
+      if (!isLiveOverdrawn) cancelFlash--;
+    }
+  }
+
+  function loop(){
+    if (phase === 'flying') updatePhysics();
+    updateParticles();
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Overlays ----------
+  const startOverlay = document.getElementById('startOverlay');
+  const passOverlay = document.getElementById('passOverlay');
+  const endOverlay = document.getElementById('endOverlay');
+  const passTitle = document.getElementById('passTitle');
+  const passBtn = document.getElementById('passBtn');
+  const passTriangle = document.getElementById('passTriangle');
+  const endTitle = document.getElementById('endTitle');
+  const endSubtitle = document.getElementById('endSubtitle');
+  const endIcon = document.getElementById('endIcon');
+  const modeBadge = document.getElementById('modeBadge');
+  const modeSubtitle = document.getElementById('modeSubtitle');
+  const greenCard = document.getElementById('greenCard');
+  const count2Btn = document.getElementById('count2Btn');
+  const count3Btn = document.getElementById('count3Btn');
+
+  function selectPlayerCount(count){
+    playerCount = count;
+    count2Btn.classList.toggle('active', count===2);
+    count3Btn.classList.toggle('active', count===3);
+    modeBadge.textContent = count + ' Players · One iPad';
+    greenCard.style.display = count===3 ? '' : 'none';
+    modeSubtitle.textContent = count===3
+      ? 'Three squadrons ring a circular arena, 120° apart — perfectly even ground no matter what shape the screen is. Tap a plane, pull back, release to fire. Ram enemies to damage them. Last squadron flying wins.'
+      : 'Two squadrons split the circular arena right in half — an even 1v1. Tap a plane, pull back, release to fire. Ram the enemy to damage them. Last squadron flying wins.';
+  }
+  count2Btn.addEventListener('click', ()=>selectPlayerCount(2));
+  count3Btn.addEventListener('click', ()=>selectPlayerCount(3));
+
+  function showPass(){
+    passOverlay.classList.remove('hidden');
+    const team = TEAMS[currentTeamIdx];
+    passTitle.textContent = 'Pass to ' + team.name;
+    passTitle.style.color = team.color;
+    passTriangle.setAttribute('fill', team.color);
+    // rotate the triangle icon to visually point toward that team's arena position
+    const deg = (team.angle * 180/Math.PI) + 90;
+    passTriangle.parentElement.style.transform = 'rotate(' + deg + 'deg)';
+  }
+
+  passBtn.addEventListener('click', ()=>{
+    passOverlay.classList.add('hidden');
+    phase = 'idle';
   });
+
+  function showEnd(){
+    endOverlay.classList.remove('hidden');
+    if (winner === 'draw'){
+      endIcon.textContent = '💥';
+      endTitle.textContent = 'Mutual Destruction';
+      endTitle.style.color = '#F4F1EA';
+      endSubtitle.textContent = 'Every squadron went down together. Nobody wins this one.';
+    } else {
+      const team = teamOf(winner);
+      endIcon.textContent = '🏆';
+      endTitle.textContent = team.name + ' Win!';
+      endTitle.style.color = team.color;
+      endSubtitle.textContent = team.name + ' are the last squadron flying.';
+    }
+  }
+
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    endOverlay.classList.add('hidden');
+    startOverlay.classList.remove('hidden');
+  });
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    friendlyFire = document.getElementById('ffCheckbox').checked;
+    startOverlay.classList.add('hidden');
+    startBattle();
+  });
+
+  function startBattle(){
+    resize();
+    TEAMS = buildTeams(playerCount);
+    makePlanes();
+    particles = [];
+    shockwaves = [];
+    damageTexts = [];
+    items = [];
+    roundsSinceItem = 0;
+    nextItemThreshold = randInt(2,4);
+    currentTeamIdx = 0;
+    winner = null;
+    phase = 'idle';
+  }
+
   loop();
 })();
 </script>
